@@ -110,7 +110,7 @@ export function Canvas({ imageData, imageId }: CanvasProps) {
     canvas.defaultCursor = "crosshair";
     canvas.selection = false;
 
-    const handleMouseDown = (e: fabric.IEvent<MouseEvent>) => {
+    const handleMouseDown = (e: fabric.IEvent) => {
       if (!e.pointer) return;
 
       isDrawingRef.current = true;
@@ -132,7 +132,7 @@ export function Canvas({ imageData, imageId }: CanvasProps) {
       }
     };
 
-    const handleMouseMove = (e: fabric.IEvent<MouseEvent>) => {
+    const handleMouseMove = (e: fabric.IEvent) => {
       if (!isDrawingRef.current || !startPointRef.current || !e.pointer) return;
 
       const currentPoint = { x: e.pointer.x, y: e.pointer.y };
