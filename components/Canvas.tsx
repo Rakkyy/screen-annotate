@@ -32,34 +32,38 @@ export function Canvas({ imageData, imageId }: CanvasProps) {
 
     fabricCanvasRef.current = canvas;
 
-    // Load background image
-    fabric.Image.fromURL(imageData, (img) => {
-      const maxWidth = window.innerWidth - 100;
-      const maxHeight = window.innerHeight - 200;
+    // Load background image with CORS support
+    fabric.Image.fromURL(
+      imageData,
+      (img) => {
+        const maxWidth = window.innerWidth - 100;
+        const maxHeight = window.innerHeight - 200;
 
-      const imgWidth = img.width || 1;
-      const imgHeight = img.height || 1;
+        const imgWidth = img.width || 1;
+        const imgHeight = img.height || 1;
 
-      const scale = Math.min(
-        maxWidth / imgWidth,
-        maxHeight / imgHeight,
-        1
-      );
+        const scale = Math.min(
+          maxWidth / imgWidth,
+          maxHeight / imgHeight,
+          1
+        );
 
-      const scaledWidth = imgWidth * scale;
-      const scaledHeight = imgHeight * scale;
+        const scaledWidth = imgWidth * scale;
+        const scaledHeight = imgHeight * scale;
 
-      canvas.setWidth(scaledWidth);
-      canvas.setHeight(scaledHeight);
+        canvas.setWidth(scaledWidth);
+        canvas.setHeight(scaledHeight);
 
-      canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
-        scaleX: scale,
-        scaleY: scale,
-      });
+        canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
+          scaleX: scale,
+          scaleY: scale,
+        });
 
-      // Save initial state
-      saveHistory();
-    });
+        // Save initial state
+        saveHistory();
+      },
+      { crossOrigin: "anonymous" }
+    );
 
     return () => {
       canvas.dispose();
