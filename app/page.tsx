@@ -13,18 +13,36 @@ export default function Home() {
 
     setIsUploading(true);
 
-    // Convert file to base64
-    const reader = new FileReader();
-    reader.onload = async (event) => {
-      const base64Image = event.target?.result as string;
+    try {
+      // Convert file to base64
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        const base64Image = event.target?.result as string;
 
-      // Save to localStorage and navigate to editor
-      const imageId = Math.random().toString(36).substring(7);
-      localStorage.setItem(`image-${imageId}`, base64Image);
+        // Upload to Vercel Blob
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ image: base64Image }),
+        });
 
-      router.push(`/editor/${imageId}`);
-    };
-    reader.readAsDataURL(file);
+        if (!response.ok) {
+          throw new Error('Upload failed');
+        }
+
+        const { id } = await response.json();
+
+        // Navigate to editor with the blob ID
+        router.push(`/editor/${id}`);
+      };
+      reader.readAsDataURL(file);
+    } catch (error) {
+      console.error('Upload error:', error);
+      alert('Failed to upload image. Please try again.');
+      setIsUploading(false);
+    }
   };
 
   return (

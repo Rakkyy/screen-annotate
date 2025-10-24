@@ -10,15 +10,27 @@ export default function EditorPage() {
   const [imageData, setImageData] = useState<string | null>(null);
 
   useEffect(() => {
-    const id = params.id as string;
-    const stored = localStorage.getItem(`image-${id}`);
+    const fetchImage = async () => {
+      const id = params.id as string;
 
-    if (!stored) {
-      router.push("/");
-      return;
-    }
+      try {
+        // Fetch image URL from API
+        const response = await fetch(`/api/image/${id}`);
 
-    setImageData(stored);
+        if (!response.ok) {
+          router.push("/");
+          return;
+        }
+
+        const { url } = await response.json();
+        setImageData(url);
+      } catch (error) {
+        console.error('Failed to fetch image:', error);
+        router.push("/");
+      }
+    };
+
+    fetchImage();
   }, [params.id, router]);
 
   if (!imageData) {
