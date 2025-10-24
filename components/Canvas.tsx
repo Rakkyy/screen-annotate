@@ -252,20 +252,36 @@ export function Canvas({ imageData, imageId }: CanvasProps) {
   const handleSave = async () => {
     if (!fabricCanvasRef.current) return;
 
-    const dataURL = fabricCanvasRef.current.toDataURL({
-      format: "png",
-      quality: 1,
-    });
+    try {
+      const dataURL = fabricCanvasRef.current.toDataURL({
+        format: "png",
+        quality: 1,
+      });
 
-    // Generate unique URL
-    const shareId = nanoid(10);
-    localStorage.setItem(`shared-${shareId}`, dataURL);
+      // Upload annotated image to Vercel Blob
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ image: dataURL }),
+      });
 
-    // Copy to clipboard
-    const url = `${window.location.origin}/share/${shareId}`;
-    await navigator.clipboard.writeText(url);
+      if (!response.ok) {
+        throw new Error('Failed to save image');
+      }
 
-    alert(`Saved! Share URL copied to clipboard:\n${url}`);
+      const { id } = await response.json();
+
+      // Copy share URL to clipboard
+      const url = `${window.location.origin}/editor/${id}`;
+      await navigator.clipboard.writeText(url);
+
+      alert(`Saved! Share URL copied to clipboard:\n${url}`);
+    } catch (error) {
+      console.error('Save error:', error);
+      alert('Failed to save image. Please try again.');
+    }
   };
 
   const handleDownload = () => {
@@ -282,6 +298,11 @@ export function Canvas({ imageData, imageId }: CanvasProps) {
     link.click();
   };
 
+  const handleNew = () => {
+    // Navigate back to home page
+    window.location.href = "/";
+  };
+
   return (
     <div className="flex flex-col h-screen">
       <Toolbar
@@ -293,6 +314,7 @@ export function Canvas({ imageData, imageId }: CanvasProps) {
         canUndo={historyStep > 0}
         onSave={handleSave}
         onDownload={handleDownload}
+        onNew={handleNew}
       />
 
       <div className="flex-1 flex items-center justify-center p-4 overflow-auto">

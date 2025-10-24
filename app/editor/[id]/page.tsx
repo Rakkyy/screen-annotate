@@ -23,7 +23,24 @@ export default function EditorPage() {
         }
 
         const { url } = await response.json();
-        setImageData(url);
+
+        // Fetch the actual image and convert to base64 to avoid CORS issues
+        const imageResponse = await fetch(url);
+
+        if (!imageResponse.ok) {
+          throw new Error(`Failed to fetch image: ${imageResponse.status}`);
+        }
+
+        const blob = await imageResponse.blob();
+
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setImageData(reader.result as string);
+        };
+        reader.onerror = () => {
+          console.error('Failed to convert image to base64');
+        };
+        reader.readAsDataURL(blob);
       } catch (error) {
         console.error('Failed to fetch image:', error);
         router.push("/");
